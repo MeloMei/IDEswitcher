@@ -1,6 +1,6 @@
-package com.ali.ideswitcher.settings
+package io.github.meloluvmei.ideswitcher.settings
 
-import com.ali.ideswitcher.target.Target
+import io.github.meloluvmei.ideswitcher.target.Target
 import com.intellij.openapi.options.Configurable
 import com.intellij.ui.components.JBRadioButton
 import java.awt.GridBagConstraints

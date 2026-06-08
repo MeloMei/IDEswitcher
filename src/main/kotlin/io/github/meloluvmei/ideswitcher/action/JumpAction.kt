@@ -1,10 +1,10 @@
-package com.ali.ideswitcher.action
+package io.github.meloluvmei.ideswitcher.action
 
-import com.ali.ideswitcher.settings.IdeSwitcherSettings
-import com.ali.ideswitcher.target.CodeFuseJumper
-import com.ali.ideswitcher.target.Jumper
-import com.ali.ideswitcher.target.QoderJumper
-import com.ali.ideswitcher.target.Target
+import io.github.meloluvmei.ideswitcher.settings.IdeSwitcherSettings
+import io.github.meloluvmei.ideswitcher.target.CodeFuseJumper
+import io.github.meloluvmei.ideswitcher.target.Jumper
+import io.github.meloluvmei.ideswitcher.target.QoderJumper
+import io.github.meloluvmei.ideswitcher.target.Target
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent

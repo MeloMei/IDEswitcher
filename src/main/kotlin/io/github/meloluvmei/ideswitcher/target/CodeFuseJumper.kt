@@ -1,4 +1,4 @@
-package com.ali.ideswitcher.target
+package io.github.meloluvmei.ideswitcher.target
 
 object CodeFuseJumper : Jumper {
     override val target = Target.CODEFUSE

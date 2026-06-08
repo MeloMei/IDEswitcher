@@ -1,25 +1,33 @@
 <idea-plugin>
-    <id>com.ali.ideswitcher</id>
+    <id>io.github.meloluvmei.ideswitcher</id>
     <name>IDEswitcher</name>
     <version>1.2.0</version>
-    <vendor email="team@example.com" url="https://example.com">Ali Team</vendor>
+    <vendor url="https://github.com/MeloLuvMei/IDEswitcher">MeloLuvMei</vendor>
 
     <description><![CDATA[
-        <p>IDEswitcher - Jump from IntelliJ IDEA to Qoder or CodeFuse while preserving cursor position and file context.</p>
-        <p>专为团队内部使用设计，通过快捷键 Option+Shift+O 跳转到 Settings 中选择的目标编辑器（Qoder 或 CodeFuse）。</p>
-        <p>仅支持 macOS。</p>
+        <p>IDEswitcher — Jump from IntelliJ IDEA to Qoder or CodeFuse while preserving cursor position and file context.</p>
+        <p>Switch between editors seamlessly with ⌥⇧O (Option+Shift+O). Configure your preferred target editor
+        (Qoder or CodeFuse) in Settings → Tools → IDEswitcher.</p>
+        <p>Features:</p>
+        <ul>
+          <li>Quick jump from IntelliJ to your configured editor with ⌥⇧O</li>
+          <li>Preserves file path and cursor position (line, column)</li>
+          <li>Configurable default target editor (Qoder / CodeFuse)</li>
+          <li>Supports opening both projects and specific files</li>
+        </ul>
+        <p>Currently macOS only. Contributions for Linux/Windows support are welcome!</p>
     ]]></description>
 
     <change-notes><![CDATA[
         <p>1.2.0</p>
         <ul>
-            <li>新增 CodeFuse 作为可选跳转目标</li>
-            <li>新增 Settings → Tools → IDEswitcher 页面，可切换默认跳转目标（Qoder / CodeFuse）</li>
-            <li>移除从未生效的 URL scheme fallback（仅保留 CLI 路径）</li>
+            <li>Add CodeFuse as a jump target option</li>
+            <li>Add Settings → Tools → IDEswitcher page to switch the default target (Qoder / CodeFuse)</li>
+            <li>Remove unused URL scheme fallback (CLI path only)</li>
         </ul>
-        <p>1.0.0 - Initial release</p>
+        <p>1.0.0 — Initial release</p>
         <ul>
-            <li>Quick jump from IntelliJ to Qoder with Option+Shift+O (Mac)</li>
+            <li>Quick jump from IntelliJ to Qoder with ⌥⇧O (Mac)</li>
             <li>Preserves file path and cursor position (line, column)</li>
             <li>Supports opening both project and specific files</li>
         </ul>
@@ -29,18 +37,18 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService
-            serviceImplementation="com.ali.ideswitcher.settings.IdeSwitcherSettings"/>
+            serviceImplementation="io.github.meloluvmei.ideswitcher.settings.IdeSwitcherSettings"/>
         <applicationConfigurable
             parentId="tools"
-            id="com.ali.ideswitcher.settings.IdeSwitcherConfigurable"
-            instance="com.ali.ideswitcher.settings.IdeSwitcherConfigurable"
+            id="io.github.meloluvmei.ideswitcher.settings.IdeSwitcherConfigurable"
+            instance="io.github.meloluvmei.ideswitcher.settings.IdeSwitcherConfigurable"
             displayName="IDEswitcher"/>
     </extensions>
 
     <actions>
         <action
-            id="com.ali.ideswitcher.action.JumpAction"
-            class="com.ali.ideswitcher.action.JumpAction"
+            id="io.github.meloluvmei.ideswitcher.action.JumpAction"
+            class="io.github.meloluvmei.ideswitcher.action.JumpAction"
             text="Jump to Editor"
             description="Open current project/file in the configured target editor (Qoder or CodeFuse)">
             <keyboard-shortcut keymap="$default" first-keystroke="shift alt O"/>

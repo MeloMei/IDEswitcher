@@ -1,4 +1,4 @@
-package com.ali.ideswitcher.target
+package io.github.meloluvmei.ideswitcher.target
 
 import java.io.File
 import java.io.IOException

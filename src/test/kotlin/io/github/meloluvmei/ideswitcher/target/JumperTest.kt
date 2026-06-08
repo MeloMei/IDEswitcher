@@ -1,4 +1,4 @@
-package com.ali.ideswitcher.target
+package io.github.meloluvmei.ideswitcher.target
 
 import kotlin.test.Test
 import kotlin.test.assertContentEquals

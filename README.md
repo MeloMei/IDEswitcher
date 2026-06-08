@@ -4,130 +4,132 @@
   <img src="https://img.shields.io/badge/version-1.2.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS-000000" alt="Platform">
   <img src="https://img.shields.io/badge/language-Kotlin%20%2B%20TypeScript-0095D5" alt="Language">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
 
-## 项目简介
+In the era of agentic coding, running IntelliJ IDEA alongside an AI-powered coding platform has become everyday practice.
 
-agentic coding 时代，开发者双开IntelliJ IDEA和agentic coding平台已成为日常。
+**IDEswitcher** provides **seamless bidirectional jumping** between IntelliJ IDEA and Qoder / CodeFuse, precisely preserving file path and cursor position (line + column).
 
-**IDEswitcher** 提供 IDEA 与 Qoder / CodeFuse 之间的**双向快速跳转**，精确保留文件路径和光标位置（行 + 列）。
+### Features
 
-### 功能特性
-
-- **双向跳转**：IDEA ↔ Qoder / IDEA ↔ CodeFuse，统一快捷键 `⌥⇧O`
-- **精确定位**：跳转后光标停在同一文件的同一行、同一列
-- **可配置目标**：Settings → Tools → IDEswitcher 中选择跳转到 Qoder 还是 CodeFuse
-- **智能默认值**：首次启动时自动检测已安装的编辑器作为默认目标
-
+- **Bidirectional Jump**: IDEA ↔ Qoder / IDEA ↔ CodeFuse, unified shortcut `⌥⇧O`
+- **Precise Positioning**: Cursor lands on the exact same line and column after jumping
+- **Configurable Target**: Choose Qoder or CodeFuse in Settings → Tools → IDEswitcher
+- **Smart Defaults**: Auto-detects installed editors on first launch
 
 ---
 
-## 快速开始
+## Quick Start
 
-### 1. 安装 IntelliJ IDEA 插件
+### 1. Install the IntelliJ IDEA Plugin
 
-**方式一：直接安装**
+**Option A: Direct Install**
 
-下载 [Releases](../../releases) 中的 `IDEswitcher-1.2.0.zip`，在 IDEA 中：Settings → Plugins → ⚙️ → Install Plugin from Disk...
+Download `IDEswitcher-1.2.0.zip` from [Releases](../../releases), then in IDEA: Settings → Plugins → ⚙️ → Install Plugin from Disk...
 
-**方式二：从源码构建**
+**Option B: Build from Source**
 
 ```bash
 cd IDEswitcher-main
 ./gradlew build
-# 产物在 build/distributions/IDEswitcher-1.2.0.zip
+# Output: build/distributions/IDEswitcher-1.2.0.zip
 ```
 
-安装后在 Settings → Tools → IDEswitcher 中选择跳转目标（Qoder 或 CodeFuse）。
+After installation, select your jump target (Qoder or CodeFuse) in Settings → Tools → IDEswitcher.
 
-### 2. 安装编辑器扩展（Qoder / CodeFuse）
+### 2. Install the Editor Extension (Qoder / CodeFuse)
 
 ```bash
 cd IDEswitcher-main/agentic-ide-extension
 npm install && npm run compile
 ```
 
-将整个 `agentic-ide-extension/` 目录拷贝到对应位置：
+Copy the entire `agentic-ide-extension/` directory to the corresponding location:
 
-| 编辑器 | 安装路径 | 目录命名 |
-|--------|---------|---------|
-| Qoder | `~/.qoder/extensions/` | `ide-switcher` |
-| CodeFuse | `~/.codefuse/extensions/` | `ali-team.ide-switcher-1.2.0` |
+| Editor   | Install Path                   | Directory Name                      |
+|----------|--------------------------------|-------------------------------------|
+| Qoder    | `~/.qoder/extensions/`         | `ide-switcher`                      |
+| CodeFuse | `~/.codefuse/extensions/`      | `meloluvmei.ide-switcher-1.2.0`   |
 
-> **注意**：CodeFuse 要求扩展目录名遵循 `publisher.name-version` 格式，否则不会识别。
+> **Note**: CodeFuse requires the extension directory name to follow the `publisher.name-version` format.
 
-### 3. 使用
+### 3. Usage
 
-在任一 IDE 中按 `⌥⇧O`（Option+Shift+O），即可跳转到另一个 IDE 的相同文件和光标位置。
+Press `⌥⇧O` (Option+Shift+O) in either IDE to jump to the other IDE at the same file and cursor position.
 
-也可以通过右键菜单 → **Jump to Editor** / **Jump to IntelliJ IDEA** 触发。
+You can also trigger it via the context menu → **Jump to Editor** / **Jump to IntelliJ IDEA**.
 
 ---
 
-## 工作原理
+## How It Works
 
 ```
-IDEA → Qoder/CodeFuse:  ⌥⇧O → 读取 Settings.target → code --goto file:line:col
-Qoder/CodeFuse → IDEA:  ⌥⇧O → 检测 IDEA 版本 → idea --line L --column C file
+IDEA → Qoder/CodeFuse:  ⌥⇧O → Read Settings.target → code --goto file:line:col
+Qoder/CodeFuse → IDEA:  ⌥⇧O → Detect IDEA version → idea --line L --column C file
 ```
 
-### 项目结构
+### Project Structure
 
 ```
 IDEswitcher-main/
-├── src/main/kotlin/com/ali/ideswitcher/
-│   ├── action/JumpAction.kt              # IDEA 端主 Action
+├── src/main/kotlin/io/github/meloluvmei/ideswitcher/
+│   ├── action/JumpAction.kt              # IDEA main Action
 │   ├── target/
-│   │   ├── Target.kt                     # 枚举：QODER / CODEFUSE
-│   │   ├── Jumper.kt                     # 跳转接口（含默认实现）
-│   │   ├── QoderJumper.kt               # Qoder 跳转常量
-│   │   └── CodeFuseJumper.kt            # CodeFuse 跳转常量
+│   │   ├── Target.kt                     # Enum: QODER / CODEFUSE
+│   │   ├── Jumper.kt                     # Jump interface (with default impl)
+│   │   ├── QoderJumper.kt               # Qoder jump constants
+│   │   └── CodeFuseJumper.kt            # CodeFuse jump constants
 │   └── settings/
-│       ├── IdeSwitcherSettings.kt        # 持久化配置
-│       └── IdeSwitcherConfigurable.kt    # Settings 页 UI
+│       ├── IdeSwitcherSettings.kt        # Persistent configuration
+│       └── IdeSwitcherConfigurable.kt    # Settings page UI
 ├── src/main/resources/META-INF/
-│   └── plugin.xml                        # IntelliJ 插件描述
-├── src/test/                             # 单元测试
-├── agentic-ide-extension/                # VS Code 扩展（通用）
-│   ├── src/extension.ts                  # 核心逻辑
-│   └── out/extension.js                  # 编译产物
-└── build.gradle.kts                      # Gradle 构建配置
+│   └── plugin.xml                        # IntelliJ plugin descriptor
+├── src/test/                             # Unit tests
+├── agentic-ide-extension/                # VS Code extension (universal)
+│   ├── src/extension.ts                  # Core logic
+│   └── out/extension.js                  # Compiled output
+└── build.gradle.kts                      # Gradle build config
 ```
 
 ---
 
-## 开发
+## Development
 
 ```bash
 cd IDEswitcher-main
 
-# 启动沙箱 IDE（插件自动加载）
+# Launch sandbox IDE (plugin auto-loaded)
 ./gradlew runIde
 
-# 运行测试
+# Run tests
 ./gradlew test
 
-# 清理
+# Clean
 ./gradlew clean
 ```
 
-### 技术栈
+### Tech Stack
 
-- **IDEA 插件**：Kotlin 1.9 + IntelliJ Platform SDK 2024.1
-- **编辑器扩展**：TypeScript + VS Code Extension API
-- **构建**：Gradle (IDEA) / npm (扩展)
-- **无运行时外部依赖**
+- **IDEA Plugin**: Kotlin 1.9 + IntelliJ Platform SDK 2024.1
+- **Editor Extension**: TypeScript + VS Code Extension API
+- **Build**: Gradle (IDEA) / npm (extension)
+- **No runtime external dependencies**
 
 ---
 
-## 已知限制
+## Known Limitations
 
-- 仅支持 macOS
-- IntelliJ IDEA 路径检测仅覆盖 `/Applications` 下的标准安装，JetBrains Toolbox 自定义路径未自动检测
-- Qoder / CodeFuse 路径硬编码为 `/Applications/Qoder.app` 和 `/Applications/CodeFuse.app`
+- macOS only (contributions for Linux/Windows support are welcome!)
+- IntelliJ IDEA path detection only covers standard installations under `/Applications`; JetBrains Toolbox custom paths are not auto-detected
+- Qoder / CodeFuse paths are hardcoded to `/Applications/Qoder.app` and `/Applications/CodeFuse.app`
+
+## Contributing
+
+Bug reports and pull requests are welcome! Feel free to open an [issue](../../issues) or submit a PR.
 
 ---
 
 ## License
 
-MIT
+[MIT](LICENSE)
