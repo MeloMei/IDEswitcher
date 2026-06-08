@@ -50,7 +50,7 @@ Copy the entire `agentic-ide-extension/` directory to the corresponding location
 | Editor   | Install Path                   | Directory Name                      |
 |----------|--------------------------------|-------------------------------------|
 | Qoder    | `~/.qoder/extensions/`         | `ide-switcher`                      |
-| CodeFuse | `~/.codefuse/extensions/`      | `meloluvmei.ide-switcher-1.2.0`   |
+| CodeFuse | `~/.codefuse/extensions/`      | `melomei.ide-switcher-1.2.0`   |
 
 > **Note**: CodeFuse requires the extension directory name to follow the `publisher.name-version` format.
 
@@ -73,7 +73,7 @@ Qoder/CodeFuse → IDEA:  ⌥⇧O → Detect IDEA version → idea --line L --co
 
 ```
 IDEswitcher-main/
-├── src/main/kotlin/io/github/meloluvmei/ideswitcher/
+├── src/main/kotlin/io/github/melomei/ideswitcher/
 │   ├── action/JumpAction.kt              # IDEA main Action
 │   ├── target/
 │   │   ├── Target.kt                     # Enum: QODER / CODEFUSE

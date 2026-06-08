@@ -3,7 +3,7 @@
   "displayName": "IDEswitcher - Jump to IntelliJ",
   "description": "Jump from this editor to IntelliJ IDEA with current file and cursor position",
   "version": "1.2.0",
-  "publisher": "meloluvmei"
+  "publisher": "melomei"
   "engines": {
     "vscode": "^1.85.0"
   },

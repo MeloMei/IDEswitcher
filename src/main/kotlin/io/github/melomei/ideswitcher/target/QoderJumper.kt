@@ -1,4 +1,4 @@
-package io.github.meloluvmei.ideswitcher.target
+package io.github.melomei.ideswitcher.target
 
 object QoderJumper : Jumper {
     override val target = Target.QODER

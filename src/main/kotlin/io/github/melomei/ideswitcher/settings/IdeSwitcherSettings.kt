@@ -1,6 +1,6 @@
-package io.github.meloluvmei.ideswitcher.settings
+package io.github.melomei.ideswitcher.settings
 
-import io.github.meloluvmei.ideswitcher.target.Target
+import io.github.melomei.ideswitcher.target.Target
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
