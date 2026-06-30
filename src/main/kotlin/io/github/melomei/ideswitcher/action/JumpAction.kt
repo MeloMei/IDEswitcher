@@ -15,7 +15,6 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.util.SystemInfo
 
 class JumpAction : AnAction() {
 
@@ -24,18 +23,11 @@ class JumpAction : AnAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = e.project != null &&
-            (SystemInfo.isMac || SystemInfo.isWindows)
+        e.presentation.isEnabledAndVisible = e.project != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-
-        if (!SystemInfo.isMac && !SystemInfo.isWindows) {
-            notifyError(project, "Unsupported Platform",
-                "IDEswitcher supports macOS and Windows.\nCurrent OS: ${SystemInfo.OS_NAME}")
-            return
-        }
 
         val target = IdeSwitcherSettings.getInstance().state.target
         val jumper: Jumper = when (target) {

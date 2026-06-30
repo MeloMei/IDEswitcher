@@ -119,6 +119,40 @@ class JumperTest {
     }
 
     @Test
+    fun `all profiles have Linux app dirs under opt`() {
+        for (profile in EditorProfile.entries) {
+            assertTrue(
+                profile.linuxPath.appDir.startsWith("/opt/"),
+                "${profile.displayName} linuxPath.appDir should start with /opt/"
+            )
+        }
+    }
+
+    @Test
+    fun `all profiles have Linux cli binary names list`() {
+        for (profile in EditorProfile.entries) {
+            assertTrue(
+                profile.linuxPath.cliBinaryNames.isNotEmpty(),
+                "${profile.displayName} linuxPath.cliBinaryNames should not be empty"
+            )
+            // The editor-specific binary name should be first, 'code' as fallback
+            assertTrue(
+                profile.linuxPath.cliBinaryNames.last() == "code",
+                "${profile.displayName} linuxPath.cliBinaryNames should end with 'code' as fallback"
+            )
+        }
+    }
+
+    @Test
+    fun `all platforms have non-empty cliBinaryNames`() {
+        for (profile in EditorProfile.entries) {
+            assertTrue(profile.macPath.cliBinaryNames.isNotEmpty())
+            assertTrue(profile.windowsPath.cliBinaryNames.isNotEmpty())
+            assertTrue(profile.linuxPath.cliBinaryNames.isNotEmpty())
+        }
+    }
+
+    @Test
     fun `forTarget returns correct profile for each target`() {
         for (target in Target.entries) {
             val profile = EditorProfile.forTarget(target)

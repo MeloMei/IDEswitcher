@@ -10,7 +10,8 @@ data class PlatformPath(
     val appDir: String,
     /** CLI path template. Use {appDir} for app directory substitution. */
     val cliPath: String,
-    val cliBinaryName: String,
+    /** CLI binary names to search on $PATH, in priority order. */
+    val cliBinaryNames: List<String>,
 )
 
 /**
@@ -27,38 +28,45 @@ enum class EditorProfile(
     val displayName: String,
     val macPath: PlatformPath,
     val windowsPath: PlatformPath,
+    val linuxPath: PlatformPath,
 ) {
     QODER(
         target = Target.QODER, displayName = "Qoder",
-        macPath = PlatformPath("/Applications/Qoder.app", "{appDir}/Contents/Resources/app/bin/code", "code"),
-        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\Qoder", "{appDir}\\bin\\code.cmd", "code.cmd"),
+        macPath = PlatformPath("/Applications/Qoder.app", "{appDir}/Contents/Resources/app/bin/code", listOf("code")),
+        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\Qoder", "{appDir}\\bin\\code.cmd", listOf("code.cmd")),
+        linuxPath = PlatformPath("/opt/qoder", "{appDir}/bin/code", listOf("qoder", "code")),
     ),
     CODEFUSE(
         target = Target.CODEFUSE, displayName = "CodeFuse",
-        macPath = PlatformPath("/Applications/CodeFuse.app", "{appDir}/Contents/Resources/app/bin/code", "code"),
-        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\CodeFuse", "{appDir}\\bin\\code.cmd", "code.cmd"),
+        macPath = PlatformPath("/Applications/CodeFuse.app", "{appDir}/Contents/Resources/app/bin/code", listOf("code")),
+        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\CodeFuse", "{appDir}\\bin\\code.cmd", listOf("code.cmd")),
+        linuxPath = PlatformPath("/opt/codefuse", "{appDir}/bin/code", listOf("codefuse", "code")),
     ),
     CURSOR(
         target = Target.CURSOR, displayName = "Cursor",
-        macPath = PlatformPath("/Applications/Cursor.app", "{appDir}/Contents/Resources/app/bin/code", "code"),
-        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\Cursor", "{appDir}\\bin\\code.cmd", "code.cmd"),
+        macPath = PlatformPath("/Applications/Cursor.app", "{appDir}/Contents/Resources/app/bin/code", listOf("code")),
+        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\Cursor", "{appDir}\\bin\\code.cmd", listOf("code.cmd")),
+        linuxPath = PlatformPath("/opt/cursor", "{appDir}/bin/code", listOf("cursor", "code")),
     ),
     WINDSURF(
         target = Target.WINDSURF, displayName = "Windsurf",
-        macPath = PlatformPath("/Applications/Windsurf.app", "{appDir}/Contents/Resources/app/bin/code", "code"),
-        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\Windsurf", "{appDir}\\bin\\code.cmd", "code.cmd"),
+        macPath = PlatformPath("/Applications/Windsurf.app", "{appDir}/Contents/Resources/app/bin/code", listOf("code")),
+        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\Windsurf", "{appDir}\\bin\\code.cmd", listOf("code.cmd")),
+        linuxPath = PlatformPath("/opt/windsurf", "{appDir}/bin/code", listOf("windsurf", "code")),
     ),
     TRAE(
         target = Target.TRAE, displayName = "Trae",
-        macPath = PlatformPath("/Applications/Trae.app", "{appDir}/Contents/Resources/app/bin/code", "code"),
-        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\Trae", "{appDir}\\bin\\code.cmd", "code.cmd"),
+        macPath = PlatformPath("/Applications/Trae.app", "{appDir}/Contents/Resources/app/bin/code", listOf("code")),
+        windowsPath = PlatformPath("%LOCALAPPDATA%\\Programs\\Trae", "{appDir}\\bin\\code.cmd", listOf("code.cmd")),
+        linuxPath = PlatformPath("/opt/trae", "{appDir}/bin/code", listOf("trae", "code")),
     );
 
     data class ResolvedPaths(val appPath: String, val cliPath: String)
 
     private fun currentPlatformPath(): PlatformPath = when (Platform.current) {
-        Platform.MACOS, Platform.LINUX -> macPath
+        Platform.MACOS -> macPath
         Platform.WINDOWS -> windowsPath
+        Platform.LINUX -> linuxPath
     }
 
     private fun expandEnv(path: String): String {
@@ -103,13 +111,15 @@ enum class EditorProfile(
             }
         }
 
-        // Strategy 4: CLI binary on $PATH / %PATH%
+        // Strategy 4: CLI binary on $PATH / %PATH% (try each binary name in order)
         val pathEnv = System.getenv("PATH") ?: return null
         val separator = if (Platform.current == Platform.WINDOWS) ";" else ":"
-        for (dir in pathEnv.split(separator)) {
-            val candidate = File(dir, pp.cliBinaryName)
-            if (candidate.exists()) {
-                return ResolvedPaths(dir, candidate.absolutePath)
+        for (binaryName in pp.cliBinaryNames) {
+            for (dir in pathEnv.split(separator)) {
+                val candidate = File(dir, binaryName)
+                if (candidate.exists()) {
+                    return ResolvedPaths(dir, candidate.absolutePath)
+                }
             }
         }
 

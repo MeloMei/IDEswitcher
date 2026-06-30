@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>io.github.melomei.ideswitcher</id>
     <name>IDEswitcher</name>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <vendor url="https://github.com/MeloMei/IDEswitcher">MeloMei</vendor>
 
     <description><![CDATA[
@@ -17,10 +17,18 @@
           <li>Configurable default target editor (Qoder / CodeFuse / Cursor / Windsurf / Trae)</li>
           <li>Balloon notifications on jump failure with actionable error messages</li>
         </ul>
-        <p>Currently supports macOS and Windows. Contributions for Linux support are welcome!</p>
+        <p>Supports macOS, Windows, and Linux.</p>
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>1.6.0</p>
+        <ul>
+            <li>Linux support: full platform compatibility for IntelliJ IDEA ↔ AI editor jumping</li>
+            <li>Linux path detection: $PATH, snap, common directories, JetBrains Toolbox</li>
+            <li>Linux .sh script handling in process execution</li>
+            <li>PlatformPath now supports multiple CLI binary names per platform</li>
+            <li>CI: GitHub Actions workflow for multi-platform build and test</li>
+        </ul>
         <p>1.5.0</p>
         <ul>
             <li>Windows support: full platform compatibility for IntelliJ IDEA ↔ AI editor jumping</li>

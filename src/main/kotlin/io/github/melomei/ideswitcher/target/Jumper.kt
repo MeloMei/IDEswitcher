@@ -35,10 +35,11 @@ interface Jumper {
         val isWindowsCmd = Platform.current == Platform.WINDOWS &&
             (paths.cliPath.endsWith(".cmd", ignoreCase = true) ||
              paths.cliPath.endsWith(".bat", ignoreCase = true))
-        val processCmd = if (isWindowsCmd) {
-            arrayOf("cmd", "/c") + cmd
-        } else {
-            cmd
+        val processCmd = when {
+            isWindowsCmd -> arrayOf("cmd", "/c") + cmd
+            Platform.current == Platform.LINUX && paths.cliPath.endsWith(".sh") ->
+                arrayOf("/bin/sh") + cmd
+            else -> cmd
         }
 
         val process = ProcessBuilder(processCmd.toList())

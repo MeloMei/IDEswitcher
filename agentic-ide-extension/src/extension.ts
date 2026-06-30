@@ -3,6 +3,7 @@ import { execFile } from 'child_process';
 import { detectIntelliJ } from './detect';
 
 const isWindows = process.platform === 'win32';
+const isLinux = process.platform === 'linux';
 
 export function activate(context: vscode.ExtensionContext) {
     const disposable = vscode.commands.registerCommand(
@@ -10,12 +11,18 @@ export function activate(context: vscode.ExtensionContext) {
         () => {
             const idea = detectIntelliJ();
             if (!idea) {
-                const triedMsg = isWindows
-                    ? 'Tried: %PATH% lookup, Program Files, JetBrains Toolbox.'
-                    : 'Tried: $PATH lookup, /Applications/, JetBrains Toolbox.';
-                const hintMsg = isWindows
-                    ? 'Make sure IntelliJ IDEA is installed. You can also add idea64.exe to your PATH.'
-                    : 'Make sure IntelliJ IDEA is installed and the `idea` CLI is available.\nIn IDEA: Tools → Create Command-line Launcher.';
+                let triedMsg: string;
+                let hintMsg: string;
+                if (isWindows) {
+                    triedMsg = 'Tried: %PATH% lookup, Program Files, JetBrains Toolbox.';
+                    hintMsg = 'Make sure IntelliJ IDEA is installed. You can also add idea64.exe to your PATH.';
+                } else if (isLinux) {
+                    triedMsg = 'Tried: $PATH lookup, /snap/bin/, common directories, JetBrains Toolbox.';
+                    hintMsg = 'Make sure IntelliJ IDEA is installed.\nFor snap: sudo snap install intellij-idea-ultimate --classic';
+                } else {
+                    triedMsg = 'Tried: $PATH lookup, /Applications/, JetBrains Toolbox.';
+                    hintMsg = 'Make sure IntelliJ IDEA is installed and the `idea` CLI is available.\nIn IDEA: Tools → Create Command-line Launcher.';
+                }
                 vscode.window.showErrorMessage(
                     `IntelliJ IDEA not found.\n\n${triedMsg}\n\n${hintMsg}`
                 );
@@ -28,6 +35,14 @@ export function activate(context: vscode.ExtensionContext) {
                 // Open IntelliJ without a specific file
                 if (isWindows) {
                     execFile('cmd', ['/c', 'start', '', idea.app], { timeout: 10000 }, (error) => {
+                        if (error) {
+                            vscode.window.showErrorMessage(
+                                `Failed to open IntelliJ IDEA: ${error.message}`
+                            );
+                        }
+                    });
+                } else if (isLinux) {
+                    execFile('xdg-open', [idea.app], { timeout: 10000 }, (error) => {
                         if (error) {
                             vscode.window.showErrorMessage(
                                 `Failed to open IntelliJ IDEA: ${error.message}`

@@ -16,7 +16,7 @@ export const IDEA_DIRS_WIN = [
     `${process.env["PROGRAMFILES(X86)"] || "C:\\Program Files (x86)"}\\JetBrains`,
 ];
 
-export type DetectionSource = "cache" | "path" | "applications" | "toolbox";
+export type DetectionSource = "cache" | "path" | "applications" | "toolbox" | "snap";
 
 export interface IntelliJPaths {
     cli: string;
@@ -171,12 +171,92 @@ function detectWin(): IntelliJPaths | null {
     return null;
 }
 
+function detectLinux(): IntelliJPaths | null {
+    // Strategy 1: $PATH lookup
+    for (const bin of ["idea", "intellij-idea-ultimate", "intellij-idea-community"]) {
+        const pathCli = findOnPath(bin, false);
+        if (pathCli) {
+            // For snap-installed IDEA, the CLI wrapper is at /snap/bin/idea
+            // For tarball, it's at <install>/bin/idea.sh
+            const appPath = deriveAppPathFromCliLinux(pathCli);
+            cachedCli = pathCli;
+            cachedApp = appPath;
+            return { cli: pathCli, app: appPath, source: "path" };
+        }
+    }
+
+    // Strategy 2: Snap installation
+    for (const snapName of ["intellij-idea-ultimate", "intellij-idea-community"]) {
+        const snapCli = `/snap/bin/${snapName}`;
+        if (fs.existsSync(snapCli)) {
+            cachedCli = snapCli;
+            cachedApp = `/snap/${snapName}/current`;
+            return { cli: snapCli, app: cachedApp, source: "snap" };
+        }
+    }
+
+    // Strategy 3: Common tarball/manual installation paths
+    const home = process.env.HOME || "";
+    const commonDirs = [
+        `${home}/.local/share/JetBrains/Toolbox/scripts`,
+        `/opt/idea`,
+        `/usr/share/idea`,
+        `${home}/idea`,
+    ];
+    for (const dir of commonDirs) {
+        if (!fs.existsSync(dir)) continue;
+        for (const bin of ["idea.sh", "idea"]) {
+            const candidate = path.join(dir, "bin", bin);
+            if (fs.existsSync(candidate)) {
+                cachedCli = candidate;
+                cachedApp = dir;
+                return { cli: candidate, app: dir, source: "applications" };
+            }
+        }
+    }
+
+    // Strategy 4: Toolbox on Linux
+    if (home) {
+        const toolboxBase = path.join(home, ".local", "share", "JetBrains", "Toolbox", "apps");
+        for (const product of ["IDEA-U", "IDEA-C"]) {
+            const productDir = path.join(toolboxBase, product);
+            if (!fs.existsSync(productDir)) continue;
+            try {
+                const versions = fs.readdirSync(productDir)
+                    .filter((v) => !v.startsWith(".")).sort().reverse();
+                for (const ver of versions) {
+                    const ideaDir = path.join(productDir, ver, "IntelliJ IDEA");
+                    for (const bin of ["idea.sh", "idea"]) {
+                        const candidate = path.join(ideaDir, "bin", bin);
+                        if (fs.existsSync(candidate)) {
+                            cachedCli = candidate;
+                            cachedApp = ideaDir;
+                            return { cli: candidate, app: ideaDir, source: "toolbox" };
+                        }
+                    }
+                }
+            } catch { continue; }
+        }
+    }
+
+    return null;
+}
+
+function deriveAppPathFromCliLinux(cliPath: string): string {
+    // Snap: /snap/bin/idea → /snap/intellij-idea-ultimate/current
+    if (cliPath.startsWith("/snap/bin/")) {
+        const snapName = path.basename(cliPath);
+        return `/snap/${snapName}/current`;
+    }
+    // Tarball: <install>/bin/idea.sh → <install>
+    // Native: /usr/bin/idea → /usr/share/idea (approximate)
+    return path.resolve(cliPath, "..", "..");
+}
+
 export function detectIntelliJ(
     dirs: string[] = IDEA_DIRS_MAC,
     platform: NodeJS.Platform = process.platform,
 ): IntelliJPaths | null {
-    const win = platform === "win32";
-
     // Check cache with validation
     if (cachedCli && cachedApp) {
         try {
@@ -188,7 +268,9 @@ export function detectIntelliJ(
         }
     }
 
-    return win ? detectWin() : detectMac(dirs);
+    if (platform === "win32") return detectWin();
+    if (platform === "linux") return detectLinux();
+    return detectMac(dirs);
 }
 
 export function clearCache(): void {
