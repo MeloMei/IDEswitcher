@@ -1,34 +1,6 @@
 import * as vscode from 'vscode';
 import { execFile } from 'child_process';
-import * as fs from 'fs';
-
-// Common IntelliJ IDEA installation paths on macOS
-const IDEA_DIRS = [
-    '/Applications/IntelliJ IDEA CE.app',
-    '/Applications/IntelliJ IDEA.app',
-    '/Applications/IntelliJ IDEA Community Edition.app',
-    '/Applications/IntelliJ IDEA Ultimate.app',
-];
-
-let cachedCli: string | null = null;
-let cachedApp: string | null = null;
-
-function detectIntelliJ(): { cli: string; app: string } | null {
-    if (cachedCli) return { cli: cachedCli, app: cachedApp! };
-
-    for (const dir of IDEA_DIRS) {
-        const candidate = `${dir}/Contents/MacOS/idea`;
-        try {
-            fs.accessSync(candidate, fs.constants.X_OK);
-            cachedCli = candidate;
-            cachedApp = dir;
-            return { cli: candidate, app: dir };
-        } catch {
-            continue;
-        }
-    }
-    return null;
-}
+import { detectIntelliJ } from './detect';
 
 export function activate(context: vscode.ExtensionContext) {
     const disposable = vscode.commands.registerCommand(

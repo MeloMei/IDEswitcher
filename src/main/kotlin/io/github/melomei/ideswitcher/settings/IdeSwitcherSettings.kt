@@ -26,11 +26,17 @@ class IdeSwitcherSettings : PersistentStateComponent<IdeSwitcherSettings.State> 
         fun getInstance(): IdeSwitcherSettings = service()
 
         private fun pickDefault(): Target {
-            val qoder = File("/Applications/Qoder.app").exists()
-            val cf = File("/Applications/CodeFuse.app").exists()
+            val installed = mapOf(
+                Target.QODER to File("/Applications/Qoder.app").exists(),
+                Target.CODEFUSE to File("/Applications/CodeFuse.app").exists(),
+                Target.CURSOR to File("/Applications/Cursor.app").exists(),
+                Target.WINDSURF to File("/Applications/Windsurf.app").exists(),
+                Target.TRAE to File("/Applications/Trae.app").exists(),
+            )
+            val found = installed.filterValues { it }.keys
             return when {
-                qoder && !cf -> Target.QODER
-                cf && !qoder -> Target.CODEFUSE
+                found.size == 1 -> found.first()
+                found.size > 1 -> found.first()
                 else -> Target.QODER
             }
         }

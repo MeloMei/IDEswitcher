@@ -15,9 +15,15 @@ class IdeSwitcherConfigurable : Configurable {
 
     private val qoderRadio = JBRadioButton("Qoder")
     private val codeFuseRadio = JBRadioButton("CodeFuse")
+    private val cursorRadio = JBRadioButton("Cursor")
+    private val windsurfRadio = JBRadioButton("Windsurf")
+    private val traeRadio = JBRadioButton("Trae")
     private val buttonGroup = ButtonGroup().apply {
         add(qoderRadio)
         add(codeFuseRadio)
+        add(cursorRadio)
+        add(windsurfRadio)
+        add(traeRadio)
     }
     private var rootPanel: JPanel? = null
 
@@ -37,6 +43,12 @@ class IdeSwitcherConfigurable : Configurable {
         gbc.gridy = 2
         panel.add(codeFuseRadio, gbc)
         gbc.gridy = 3
+        panel.add(cursorRadio, gbc)
+        gbc.gridy = 4
+        panel.add(windsurfRadio, gbc)
+        gbc.gridy = 5
+        panel.add(traeRadio, gbc)
+        gbc.gridy = 6
         gbc.weighty = 1.0
         gbc.fill = GridBagConstraints.BOTH
         panel.add(JPanel(), gbc)
@@ -58,6 +70,9 @@ class IdeSwitcherConfigurable : Configurable {
         when (IdeSwitcherSettings.getInstance().state.target) {
             Target.QODER -> qoderRadio.isSelected = true
             Target.CODEFUSE -> codeFuseRadio.isSelected = true
+            Target.CURSOR -> cursorRadio.isSelected = true
+            Target.WINDSURF -> windsurfRadio.isSelected = true
+            Target.TRAE -> traeRadio.isSelected = true
         }
     }
 
@@ -65,6 +80,11 @@ class IdeSwitcherConfigurable : Configurable {
         rootPanel = null
     }
 
-    private fun selectedTarget(): Target =
-        if (codeFuseRadio.isSelected) Target.CODEFUSE else Target.QODER
+    private fun selectedTarget(): Target = when {
+        codeFuseRadio.isSelected -> Target.CODEFUSE
+        cursorRadio.isSelected -> Target.CURSOR
+        windsurfRadio.isSelected -> Target.WINDSURF
+        traeRadio.isSelected -> Target.TRAE
+        else -> Target.QODER
+    }
 }

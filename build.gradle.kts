@@ -5,14 +5,13 @@ plugins {
 }
 
 group = "io.github.melomei"
-version = "1.2.0"
+version = "1.3.0"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly("com.google.code.gson:gson:2.10.1")
     testImplementation(kotlin("test"))
 }
 

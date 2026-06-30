@@ -1,24 +1,29 @@
 <idea-plugin>
     <id>io.github.melomei.ideswitcher</id>
     <name>IDEswitcher</name>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <vendor url="https://github.com/MeloMei/IDEswitcher">MeloMei</vendor>
 
     <description><![CDATA[
-        <p>IDEswitcher — Jump from IntelliJ IDEA to Qoder or CodeFuse while preserving cursor position and file context.</p>
+        <p>IDEswitcher — Jump from IntelliJ IDEA to your AI editor while preserving cursor position and file context.</p>
         <p>Switch between editors seamlessly with ⌥⇧O (Option+Shift+O). Configure your preferred target editor
-        (Qoder or CodeFuse) in Settings → Tools → IDEswitcher.</p>
+        (Qoder, CodeFuse, Cursor, Windsurf, or Trae) in Settings → Tools → IDEswitcher.</p>
         <p>Features:</p>
         <ul>
           <li>Quick jump from IntelliJ to your configured editor with ⌥⇧O</li>
           <li>Preserves file path and cursor position (line, column)</li>
-          <li>Configurable default target editor (Qoder / CodeFuse)</li>
+          <li>Configurable default target editor (Qoder / CodeFuse / Cursor / Windsurf / Trae)</li>
           <li>Supports opening both projects and specific files</li>
         </ul>
         <p>Currently macOS only. Contributions for Linux/Windows support are welcome!</p>
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>1.3.0</p>
+        <ul>
+            <li>Add Cursor, Windsurf, and Trae as jump target options</li>
+            <li>Settings now supports 5 editor targets with auto-detection</li>
+        </ul>
         <p>1.2.0</p>
         <ul>
             <li>Add CodeFuse as a jump target option</li>
@@ -50,7 +55,7 @@
             id="io.github.melomei.ideswitcher.action.JumpAction"
             class="io.github.melomei.ideswitcher.action.JumpAction"
             text="Jump to Editor"
-            description="Open current project/file in the configured target editor (Qoder or CodeFuse)">
+            description="Open current project/file in the configured target editor (Qoder, CodeFuse, Cursor, Windsurf, or Trae)">
             <keyboard-shortcut keymap="$default" first-keystroke="shift alt O"/>
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="shift alt O"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>

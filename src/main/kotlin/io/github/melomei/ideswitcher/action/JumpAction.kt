@@ -2,9 +2,12 @@ package io.github.melomei.ideswitcher.action
 
 import io.github.melomei.ideswitcher.settings.IdeSwitcherSettings
 import io.github.melomei.ideswitcher.target.CodeFuseJumper
+import io.github.melomei.ideswitcher.target.CursorJumper
 import io.github.melomei.ideswitcher.target.Jumper
 import io.github.melomei.ideswitcher.target.QoderJumper
 import io.github.melomei.ideswitcher.target.Target
+import io.github.melomei.ideswitcher.target.TraeJumper
+import io.github.melomei.ideswitcher.target.WindsurfJumper
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -39,6 +42,9 @@ class JumpAction : AnAction() {
         val jumper: Jumper = when (target) {
             Target.QODER -> QoderJumper
             Target.CODEFUSE -> CodeFuseJumper
+            Target.CURSOR -> CursorJumper
+            Target.WINDSURF -> WindsurfJumper
+            Target.TRAE -> TraeJumper
         }
 
         if (!jumper.isInstalled()) {
