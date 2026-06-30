@@ -2,17 +2,22 @@ import * as vscode from 'vscode';
 import { execFile } from 'child_process';
 import { detectIntelliJ } from './detect';
 
+const isWindows = process.platform === 'win32';
+
 export function activate(context: vscode.ExtensionContext) {
     const disposable = vscode.commands.registerCommand(
         'ideSwitcher.jumpToIntelliJ',
         () => {
             const idea = detectIntelliJ();
             if (!idea) {
+                const triedMsg = isWindows
+                    ? 'Tried: %PATH% lookup, Program Files, JetBrains Toolbox.'
+                    : 'Tried: $PATH lookup, /Applications/, JetBrains Toolbox.';
+                const hintMsg = isWindows
+                    ? 'Make sure IntelliJ IDEA is installed. You can also add idea64.exe to your PATH.'
+                    : 'Make sure IntelliJ IDEA is installed and the `idea` CLI is available.\nIn IDEA: Tools → Create Command-line Launcher.';
                 vscode.window.showErrorMessage(
-                    'IntelliJ IDEA not found.\n\n' +
-                    'Tried: $PATH lookup, /Applications/, JetBrains Toolbox.\n\n' +
-                    'Make sure IntelliJ IDEA is installed and the `idea` CLI is available.\n' +
-                    'In IDEA: Tools → Create Command-line Launcher.'
+                    `IntelliJ IDEA not found.\n\n${triedMsg}\n\n${hintMsg}`
                 );
                 return;
             }
@@ -20,13 +25,24 @@ export function activate(context: vscode.ExtensionContext) {
             const editor = vscode.window.activeTextEditor;
 
             if (!editor || editor.document.uri.scheme !== 'file') {
-                execFile('open', [idea.app], { timeout: 10000 }, (error) => {
-                    if (error) {
-                        vscode.window.showErrorMessage(
-                            `Failed to open IntelliJ IDEA: ${error.message}`
-                        );
-                    }
-                });
+                // Open IntelliJ without a specific file
+                if (isWindows) {
+                    execFile('cmd', ['/c', 'start', '', idea.app], { timeout: 10000 }, (error) => {
+                        if (error) {
+                            vscode.window.showErrorMessage(
+                                `Failed to open IntelliJ IDEA: ${error.message}`
+                            );
+                        }
+                    });
+                } else {
+                    execFile('open', [idea.app], { timeout: 10000 }, (error) => {
+                        if (error) {
+                            vscode.window.showErrorMessage(
+                                `Failed to open IntelliJ IDEA: ${error.message}`
+                            );
+                        }
+                    });
+                }
                 return;
             }
 
@@ -40,17 +56,17 @@ export function activate(context: vscode.ExtensionContext) {
                     let message: string;
                     const code = (error as any).code;
                     if (code === 'ENOENT') {
-                        message =
-                            'IntelliJ IDEA CLI not found.\n\n' +
-                            'Open IntelliJ → Tools → Create Command-line Launcher to install the `idea` CLI.';
+                        message = isWindows
+                            ? 'IntelliJ IDEA CLI not found (idea64.exe).\n\nMake sure IntelliJ is installed and its bin directory is on your PATH.'
+                            : 'IntelliJ IDEA CLI not found.\n\nOpen IntelliJ → Tools → Create Command-line Launcher to install the `idea` CLI.';
                     } else if (code === 'ETIMEDOUT' || (error as any).killed) {
                         message =
                             'IntelliJ IDEA took too long to respond (>10s).\n\n' +
                             'It may be busy indexing. Try again in a moment.';
-                    } else if ((error as any).code === 'EACCES') {
-                        message =
-                            `Permission denied: ${idea.cli}\n\n` +
-                            'Run: chmod +x "' + idea.cli + '"';
+                    } else if (code === 'EACCES') {
+                        message = isWindows
+                            ? `Access denied: ${idea.cli}\n\nTry running your editor as Administrator.`
+                            : `Permission denied: ${idea.cli}\n\nRun: chmod +x "${idea.cli}"`;
                     } else {
                         message = `Failed to jump to IntelliJ IDEA: ${error.message}`;
                     }

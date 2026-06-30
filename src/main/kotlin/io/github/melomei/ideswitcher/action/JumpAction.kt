@@ -24,15 +24,16 @@ class JumpAction : AnAction() {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = e.project != null && SystemInfo.isMac
+        e.presentation.isEnabledAndVisible = e.project != null &&
+            (SystemInfo.isMac || SystemInfo.isWindows)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
 
-        if (!SystemInfo.isMac) {
+        if (!SystemInfo.isMac && !SystemInfo.isWindows) {
             notifyError(project, "Unsupported Platform",
-                "IDEswitcher only supports macOS.\nCurrent OS: ${SystemInfo.OS_NAME}")
+                "IDEswitcher supports macOS and Windows.\nCurrent OS: ${SystemInfo.OS_NAME}")
             return
         }
 

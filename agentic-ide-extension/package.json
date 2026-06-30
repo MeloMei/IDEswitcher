@@ -2,7 +2,7 @@
   "name": "ide-switcher",
   "displayName": "IDEswitcher - Jump to IntelliJ",
   "description": "Jump from this editor to IntelliJ IDEA with current file and cursor position",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "publisher": "melomei",
   "license": "MIT",
   "repository": {

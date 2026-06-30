@@ -1,8 +1,8 @@
 # IDEswitcher
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.4.0-blue" alt="Version">
-  <img src="https://img.shields.io/badge/platform-macOS-000000" alt="Platform">
+  <img src="https://img.shields.io/badge/version-1.5.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-000000" alt="Platform">
   <img src="https://img.shields.io/badge/language-Kotlin%20%2B%20TypeScript-0095D5" alt="Language">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
@@ -13,7 +13,7 @@ In the era of agentic coding, running IntelliJ IDEA alongside an AI-powered codi
 
 ### Features
 
-- **Bidirectional Jump**: IDEA ↔ AI Editor, unified shortcut `⌥⇧O`
+- **Bidirectional Jump**: IDEA ↔ AI Editor, unified shortcut `⌥⇧O` (Mac) / `Ctrl+Alt+O` (Windows)
 - **Precise Positioning**: Cursor lands on the exact same line and column after jumping
 - **5 Editor Targets**: Qoder, CodeFuse, Cursor, Windsurf, Trae — configurable in Settings → Tools → IDEswitcher
 - **Smart Defaults**: Auto-detects installed editors on first launch
@@ -26,14 +26,14 @@ In the era of agentic coding, running IntelliJ IDEA alongside an AI-powered codi
 
 **Option A: Direct Install**
 
-Download `IDEswitcher-1.4.0.zip` from [Releases](../../releases), then in IDEA: Settings → Plugins → ⚙️ → Install Plugin from Disk...
+Download `IDEswitcher-1.5.0.zip` from [Releases](../../releases), then in IDEA: Settings → Plugins → ⚙️ → Install Plugin from Disk...
 
 **Option B: Build from Source**
 
 ```bash
 cd IDEswitcher-main
 ./gradlew build
-# Output: build/distributions/IDEswitcher-1.4.0.zip
+# Output: build/distributions/IDEswitcher-1.5.0.zip
 ```
 
 After installation, select your jump target in Settings → Tools → IDEswitcher.
@@ -50,7 +50,7 @@ Copy the entire `agentic-ide-extension/` directory to the corresponding location
 | Editor    | Install Path                   | Directory Name                       |
 |-----------|--------------------------------|--------------------------------------|
 | Qoder     | `~/.qoder/extensions/`         | `ide-switcher`                       |
-| CodeFuse  | `~/.codefuse/extensions/`      | `melomei.ide-switcher-1.4.0`    |
+| CodeFuse  | `~/.codefuse/extensions/`      | `melomei.ide-switcher-1.5.0`    |
 | Cursor    | Built-in (VS Code extension)   | Install via Extensions panel         |
 | Windsurf  | Built-in (VS Code extension)   | Install via Extensions panel         |
 | Trae      | Built-in (VS Code extension)   | Install via Extensions panel         |
@@ -60,7 +60,7 @@ Copy the entire `agentic-ide-extension/` directory to the corresponding location
 
 ### 3. Usage
 
-Press `⌥⇧O` (Option+Shift+O) in either IDE to jump to the other IDE at the same file and cursor position.
+Press `⌥⇧O` (Option+Shift+O) on Mac or `Ctrl+Alt+O` on Windows in either IDE to jump to the other IDE at the same file and cursor position.
 
 You can also trigger it via the context menu → **Jump to Editor** / **Jump to IntelliJ IDEA**.
 
@@ -69,8 +69,8 @@ You can also trigger it via the context menu → **Jump to Editor** / **Jump to 
 ## How It Works
 
 ```
-IDEA → AI Editor:  ⌥⇧O → Read Settings.target → code --goto file:line:col
-AI Editor → IDEA:  ⌥⇧O → Detect IDEA version → idea --line L --column C file
+IDEA → AI Editor:  shortcut → Read Settings.target → EditorProfile.resolvePath() → code --goto file:line:col
+AI Editor → IDEA:  shortcut → detectIntelliJ() [PATH | /Applications | Toolbox] → idea --line L --column C file
 ```
 
 ### Project Structure
@@ -79,8 +79,10 @@ AI Editor → IDEA:  ⌥⇧O → Detect IDEA version → idea --line L --column 
 IDEswitcher-main/
 ├── src/main/kotlin/io/github/melomei/ideswitcher/
 │   ├── action/JumpAction.kt              # IDEA main Action
+│   ├── platform/Platform.kt              # OS detection enum
 │   ├── target/
 │   │   ├── Target.kt                     # Enum: QODER / CODEFUSE / CURSOR / WINDSURF / TRAE
+│   │   ├── EditorProfile.kt             # Cross-platform path resolution
 │   │   ├── Jumper.kt                     # Jump interface (with default impl)
 │   │   ├── QoderJumper.kt               # Qoder jump constants
 │   │   ├── CodeFuseJumper.kt            # CodeFuse jump constants
@@ -96,8 +98,8 @@ IDEswitcher-main/
 ├── agentic-ide-extension/                # VS Code extension (universal)
 │   ├── src/
 │   │   ├── extension.ts                  # Core logic
-│   │   ├── detect.ts                     # IntelliJ path detection
-│   │   └── detect.test.ts                # Tests
+│   │   ├── detect.ts                     # Cross-platform IntelliJ detection
+│   │   └── detect.test.ts                # Detection tests
 │   └── out/extension.js                  # Compiled output
 └── build.gradle.kts                      # Gradle build config
 ```
@@ -133,8 +135,8 @@ cd agentic-ide-extension && npm test
 
 ## Known Limitations
 
-- macOS only (contributions for Linux/Windows support are welcome!)
-- Editor app paths default to `/Applications/` — use the custom path setting for non-standard installations
+- Supports macOS and Windows (contributions for Linux support are welcome!)
+- Editor app paths default to standard installation locations — use the custom path setting for non-standard installations
 
 ## Troubleshooting
 
@@ -149,13 +151,14 @@ cd agentic-ide-extension && npm test
 The plugin now captures stderr and shows it in a balloon notification. Common causes:
 
 - CLI binary missing: some editors require you to install their CLI manually (e.g., VS Code → "Install 'code' command in PATH")
-- Permission denied: run `chmod +x <path-to-cli>` on the CLI binary
+- Permission denied (macOS): run `chmod +x <path-to-cli>` on the CLI binary
+- Permission denied (Windows): try running your editor as Administrator
 
 **Extension side (jumping back to IntelliJ):**
 
-- "IntelliJ IDEA CLI not found": Open IntelliJ → Tools → Create Command-line Launcher
+- "IntelliJ IDEA CLI not found" (macOS): Open IntelliJ → Tools → Create Command-line Launcher
+- "IntelliJ IDEA CLI not found" (Windows): Make sure IntelliJ is installed and `idea64.exe` is on your PATH
 - "IntelliJ IDEA took too long to respond": IDEA may be busy indexing; wait and try again
-- "Permission denied": Run `chmod +x` on the `idea` binary
 
 ---
 

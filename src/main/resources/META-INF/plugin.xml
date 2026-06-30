@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>io.github.melomei.ideswitcher</id>
     <name>IDEswitcher</name>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <vendor url="https://github.com/MeloMei/IDEswitcher">MeloMei</vendor>
 
     <description><![CDATA[
@@ -17,10 +17,18 @@
           <li>Configurable default target editor (Qoder / CodeFuse / Cursor / Windsurf / Trae)</li>
           <li>Balloon notifications on jump failure with actionable error messages</li>
         </ul>
-        <p>Currently macOS only. Contributions for Linux/Windows support are welcome!</p>
+        <p>Currently supports macOS and Windows. Contributions for Linux support are welcome!</p>
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>1.5.0</p>
+        <ul>
+            <li>Windows support: full platform compatibility for IntelliJ IDEA ↔ AI editor jumping</li>
+            <li>Cross-platform path detection: Program Files, %PATH%, JetBrains Toolbox on Windows</li>
+            <li>Windows .cmd/.bat CLI files handled via cmd /c</li>
+            <li>Windows keyboard shortcut: Ctrl+Alt+O</li>
+            <li>Architectural: Platform enum + PlatformPath data class for per-OS path configs</li>
+        </ul>
         <p>1.4.0</p>
         <ul>
             <li>Smart path detection: auto-discovers editors via /Applications, JetBrains Toolbox, and $PATH</li>
@@ -70,7 +78,7 @@
             class="io.github.melomei.ideswitcher.action.JumpAction"
             text="Jump to Editor"
             description="Open current project/file in the configured target editor (Qoder, CodeFuse, Cursor, Windsurf, or Trae)">
-            <keyboard-shortcut keymap="$default" first-keystroke="shift alt O"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="control alt O"/>
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="shift alt O"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>

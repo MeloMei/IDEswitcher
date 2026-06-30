@@ -79,21 +79,41 @@ class JumperTest {
     }
 
     @Test
-    fun `all profiles have app bundle names ending in dot app`() {
+    fun `all profiles have macOS app dirs ending in dot app`() {
         for (profile in EditorProfile.entries) {
             assertTrue(
-                profile.appBundleName.endsWith(".app"),
-                "${profile.displayName} appBundleName should end with .app"
+                profile.macPath.appDir.endsWith(".app"),
+                "${profile.displayName} macPath.appDir should end with .app"
             )
         }
     }
 
     @Test
-    fun `all profiles have cli paths ending in code`() {
+    fun `all profiles have macOS cli paths ending in code`() {
         for (profile in EditorProfile.entries) {
             assertTrue(
-                profile.cliRelativePath.endsWith("/code"),
-                "${profile.displayName} cliRelativePath should end with /code"
+                profile.macPath.cliPath.endsWith("/code"),
+                "${profile.displayName} macPath.cliPath should end with /code"
+            )
+        }
+    }
+
+    @Test
+    fun `all profiles have Windows cli paths ending in code dot cmd`() {
+        for (profile in EditorProfile.entries) {
+            assertTrue(
+                profile.windowsPath.cliPath.endsWith("code.cmd"),
+                "${profile.displayName} windowsPath.cliPath should end with code.cmd"
+            )
+        }
+    }
+
+    @Test
+    fun `all profiles use LOCALAPPDATA in Windows paths`() {
+        for (profile in EditorProfile.entries) {
+            assertTrue(
+                profile.windowsPath.appDir.contains("LOCALAPPDATA"),
+                "${profile.displayName} windowsPath.appDir should reference %LOCALAPPDATA%"
             )
         }
     }
@@ -119,7 +139,7 @@ class JumperTest {
     fun `all jumpers produce correct --goto command format`() {
         val jumpers = listOf(QoderJumper, CodeFuseJumper, CursorJumper, WindsurfJumper, TraeJumper)
         for (jumper in jumpers) {
-            val cli = jumper.profile.cliRelativePath
+            val cli = jumper.profile.macPath.cliPath
             val cmd = jumper.buildCommand(cli, "/proj", "/proj/Main.kt", 10, 5)
             assertEquals(cli, cmd[0], "${jumper.profile.displayName} cliPath mismatch")
             assertEquals("--goto", cmd[1], "${jumper.profile.displayName} --goto flag missing")

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import * as fs from "fs";
 import * as child_process from "child_process";
-import { detectIntelliJ, clearCache, IDEA_DIRS } from "./detect";
+import { detectIntelliJ, clearCache, IDEA_DIRS_MAC } from "./detect";
 
 vi.mock("fs");
 vi.mock("child_process");
@@ -22,7 +22,7 @@ describe("detectIntelliJ", () => {
         });
         vi.mocked(fs.existsSync).mockReturnValue(false);
 
-        const result = detectIntelliJ();
+        const result = detectIntelliJ(undefined, "darwin");
         expect(result).toBeNull();
     });
 
@@ -33,7 +33,7 @@ describe("detectIntelliJ", () => {
         vi.mocked(fs.existsSync).mockReturnValue(true);
         vi.mocked(fs.accessSync).mockReturnValue(); // all accessible
 
-        const result = detectIntelliJ();
+        const result = detectIntelliJ(undefined, "darwin");
         expect(result).not.toBeNull();
         expect(result!.cli).toBe("/usr/local/bin/idea");
         expect(result!.source).toBe("path");
@@ -53,7 +53,7 @@ describe("detectIntelliJ", () => {
             throw new Error("ENOENT");
         });
 
-        const result = detectIntelliJ();
+        const result = detectIntelliJ(undefined, "darwin");
         expect(result).not.toBeNull();
         expect(result!.app).toBe("/Applications/IntelliJ IDEA.app");
         expect(result!.source).toBe("applications");
@@ -65,10 +65,10 @@ describe("detectIntelliJ", () => {
         });
         vi.mocked(fs.accessSync).mockReturnValue();
 
-        const first = detectIntelliJ(["/Applications/IntelliJ IDEA.app"]);
+        const first = detectIntelliJ(["/Applications/IntelliJ IDEA.app"], "darwin");
         expect(first!.source).toBe("applications");
 
-        const second = detectIntelliJ(["/Applications/IntelliJ IDEA.app"]);
+        const second = detectIntelliJ(["/Applications/IntelliJ IDEA.app"], "darwin");
         expect(second!.source).toBe("cache");
         expect(second!.cli).toBe(first!.cli);
     });
@@ -79,7 +79,7 @@ describe("detectIntelliJ", () => {
         });
         vi.mocked(fs.accessSync).mockReturnValue();
 
-        detectIntelliJ(["/Applications/IntelliJ IDEA.app"]);
+        detectIntelliJ(["/Applications/IntelliJ IDEA.app"], "darwin");
         clearCache();
 
         vi.mocked(fs.accessSync).mockImplementation(() => {
@@ -87,7 +87,7 @@ describe("detectIntelliJ", () => {
         });
         vi.mocked(fs.existsSync).mockReturnValue(false);
 
-        const result = detectIntelliJ(["/Applications/IntelliJ IDEA.app"]);
+        const result = detectIntelliJ(["/Applications/IntelliJ IDEA.app"], "darwin");
         expect(result).toBeNull();
     });
 
@@ -102,15 +102,15 @@ describe("detectIntelliJ", () => {
             throw new Error("ENOENT");
         });
 
-        const result = detectIntelliJ(["/custom/path"]);
+        const result = detectIntelliJ(["/custom/path"], "darwin");
         expect(result).not.toBeNull();
         expect(result!.app).toBe("/custom/path");
     });
 
-    it("IDEA_DIRS contains expected default paths", () => {
-        expect(IDEA_DIRS.length).toBeGreaterThanOrEqual(4);
-        expect(IDEA_DIRS).toContain("/Applications/IntelliJ IDEA.app");
-        expect(IDEA_DIRS).toContain("/Applications/IntelliJ IDEA CE.app");
+    it("IDEA_DIRS_MAC contains expected default paths", () => {
+        expect(IDEA_DIRS_MAC.length).toBeGreaterThanOrEqual(4);
+        expect(IDEA_DIRS_MAC).toContain("/Applications/IntelliJ IDEA.app");
+        expect(IDEA_DIRS_MAC).toContain("/Applications/IntelliJ IDEA CE.app");
     });
 });
 

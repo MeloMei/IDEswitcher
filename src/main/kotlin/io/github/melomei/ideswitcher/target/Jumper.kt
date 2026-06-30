@@ -1,17 +1,14 @@
 package io.github.melomei.ideswitcher.target
 
+import io.github.melomei.ideswitcher.platform.Platform
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 interface Jumper {
     val profile: EditorProfile
 
-    fun isInstalled(): Boolean {
-        val resolved = resolve()
-        return resolved != null
-    }
+    fun isInstalled(): Boolean = resolve() != null
 
-    /** Current resolved paths (cached). Returns null if editor not found. */
     fun resolve(): EditorProfile.ResolvedPaths? {
         val customPath = try {
             io.github.melomei.ideswitcher.settings.IdeSwitcherSettings
@@ -28,12 +25,23 @@ interface Jumper {
             ?: throw IOException("${profile.displayName} not found. Check installation or set a custom path in Settings → Tools → IDEswitcher.")
 
         val cli = java.io.File(paths.cliPath)
-        if (!cli.canExecute()) {
-            throw IOException("${profile.displayName} CLI not executable: ${paths.cliPath}")
+        if (!cli.exists()) {
+            throw IOException("${profile.displayName} CLI not found: ${paths.cliPath}")
         }
 
         val cmd = buildCommand(paths.cliPath, projectPath, filePath, line, column)
-        val process = ProcessBuilder(cmd.toList())
+
+        // On Windows, .cmd/.bat files must be launched via cmd /c
+        val isWindowsCmd = Platform.current == Platform.WINDOWS &&
+            (paths.cliPath.endsWith(".cmd", ignoreCase = true) ||
+             paths.cliPath.endsWith(".bat", ignoreCase = true))
+        val processCmd = if (isWindowsCmd) {
+            arrayOf("cmd", "/c") + cmd
+        } else {
+            cmd
+        }
+
+        val process = ProcessBuilder(processCmd.toList())
             .redirectOutput(ProcessBuilder.Redirect.DISCARD)
             .start()
 
