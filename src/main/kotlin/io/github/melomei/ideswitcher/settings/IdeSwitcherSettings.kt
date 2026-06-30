@@ -18,6 +18,12 @@ class IdeSwitcherSettings : PersistentStateComponent<IdeSwitcherSettings.State> 
         var customPaths: MutableMap<String, String> = mutableMapOf(),
         /** Whether the welcome notification has been shown. */
         var firstRunDone: Boolean = false,
+        /**
+         * Per-project workspace mapping.
+         * Key is IntelliJ project base path, value is target editor workspace/folder path.
+         * Enables multi-project awareness: jumping from project A opens the correct workspace in the target editor.
+         */
+        var workspaceMappings: MutableMap<String, String> = mutableMapOf(),
     )
 
     private var state = State()

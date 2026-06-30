@@ -1,26 +1,36 @@
 <idea-plugin>
     <id>io.github.melomei.ideswitcher</id>
     <name>IDEswitcher</name>
-    <version>1.7.0</version>
+    <version>2.0.0</version>
     <vendor url="https://github.com/MeloMei/IDEswitcher">MeloMei</vendor>
 
     <description><![CDATA[
         <p>IDEswitcher — Jump from IntelliJ IDEA to your AI editor while preserving cursor position and file context.</p>
-        <p>Switch between editors seamlessly with ⌥⇧O (Option+Shift+O). Configure your preferred target editor
-        (Qoder, CodeFuse, Cursor, Windsurf, or Trae) in Settings → Tools → IDEswitcher.</p>
+        <p>Switch between editors seamlessly with ⌥⇧O (Option+Shift+O) on Mac or Ctrl+Alt+O on Windows/Linux.
+        Configure your preferred target editor (Qoder, CodeFuse, Cursor, Windsurf, or Trae) in Settings → Tools → IDEswitcher.</p>
         <p>Features:</p>
         <ul>
-          <li>Quick jump from IntelliJ to your configured editor with ⌥⇧O</li>
+          <li>Quick jump from IntelliJ to your configured editor</li>
           <li>Preserves file path and cursor position (line, column)</li>
           <li>Smart path detection — auto-discovers editors via /Applications, JetBrains Toolbox, and $PATH</li>
           <li>Custom path override for non-standard installations</li>
-          <li>Configurable default target editor (Qoder / CodeFuse / Cursor / Windsurf / Trae)</li>
-          <li>Balloon notifications on jump failure with actionable error messages</li>
+          <li>Status bar widget showing current target — click to cycle</li>
+          <li>Balloon notifications on jump failure with [Open Settings] action</li>
+          <li>Extension point for third-party editor support</li>
+          <li>Multi-project workspace mapping</li>
         </ul>
         <p>Supports macOS, Windows, and Linux.</p>
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>2.0.0</p>
+        <ul>
+            <li>Extension point: third-party plugins can register custom editor jumpers via JumperProvider</li>
+            <li>Settings UI: table view showing all editors with install status and resolved paths</li>
+            <li>Multi-project workspace mapping support in settings state</li>
+            <li>CONTRIBUTING.md with step-by-step guide for adding new editors</li>
+            <li>Issue templates for bug reports and feature requests</li>
+        </ul>
         <p>1.7.0</p>
         <ul>
             <li>Status bar widget showing current jump target — click to cycle through installed editors</li>
@@ -91,6 +101,13 @@
         <postStartupActivity
             implementation="io.github.melomei.ideswitcher.startup.WelcomeActivity"/>
     </extensions>
+
+    <extensionPoints>
+        <extensionPoint
+            name="jumper"
+            interface="io.github.melomei.ideswitcher.extension.JumperProvider"
+            dynamic="true"/>
+    </extensionPoints>
 
     <actions>
         <action
