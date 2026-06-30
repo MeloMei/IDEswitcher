@@ -8,12 +8,13 @@ import io.github.melomei.ideswitcher.target.QoderJumper
 import io.github.melomei.ideswitcher.target.Target
 import io.github.melomei.ideswitcher.target.TraeJumper
 import io.github.melomei.ideswitcher.target.WindsurfJumper
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.SystemInfo
 
 class JumpAction : AnAction() {
@@ -30,11 +31,8 @@ class JumpAction : AnAction() {
         val project = e.project ?: return
 
         if (!SystemInfo.isMac) {
-            Messages.showErrorDialog(
-                project,
-                "IDEswitcher only supports macOS.\nCurrent OS: ${SystemInfo.OS_NAME}",
-                "Unsupported Platform"
-            )
+            notifyError(project, "Unsupported Platform",
+                "IDEswitcher only supports macOS.\nCurrent OS: ${SystemInfo.OS_NAME}")
             return
         }
 
@@ -48,12 +46,10 @@ class JumpAction : AnAction() {
         }
 
         if (!jumper.isInstalled()) {
-            Messages.showErrorDialog(
-                project,
-                "${jumper.displayName} not found at ${jumper.appPath}.\n" +
-                    "Install it, or change the target in Settings → Tools → IDEswitcher.",
-                "${jumper.displayName} Not Found"
-            )
+            notifyError(project,
+                "${jumper.profile.displayName} Not Found",
+                "Could not find ${jumper.profile.displayName}. " +
+                    "Install it, or set a custom path in Settings → Tools → IDEswitcher.")
             return
         }
 
@@ -62,7 +58,7 @@ class JumpAction : AnAction() {
         val line = editor?.caretModel?.currentCaret?.logicalPosition?.line?.plus(1)
         val column = editor?.caretModel?.currentCaret?.logicalPosition?.column?.plus(1)
         val projectPath = project.basePath ?: run {
-            Messages.showErrorDialog(project, "Cannot determine project path.", "Jump Failed")
+            notifyError(project, "Jump Failed", "Cannot determine project path.")
             return
         }
         val filePath = if (file?.isDirectory == false) file.path else null
@@ -70,12 +66,21 @@ class JumpAction : AnAction() {
         try {
             jumper.jump(projectPath, filePath, line, column)
         } catch (ex: Exception) {
-            logger.error("Failed to jump to ${jumper.displayName}", ex)
-            Messages.showErrorDialog(
-                project,
-                "Failed to open ${jumper.displayName}: ${ex.message}",
-                "Jump Failed"
-            )
+            logger.warn("Failed to jump to ${jumper.profile.displayName}", ex)
+            notifyError(project,
+                "Jump to ${jumper.profile.displayName} Failed",
+                ex.message ?: "Unknown error")
         }
+    }
+
+    private fun notifyError(
+        project: com.intellij.openapi.project.Project,
+        title: String,
+        content: String,
+    ) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("IDEswitcher")
+            .createNotification(title, content, NotificationType.ERROR)
+            .notify(project)
     }
 }

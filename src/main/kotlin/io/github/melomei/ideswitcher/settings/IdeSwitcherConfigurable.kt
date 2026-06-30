@@ -1,7 +1,10 @@
 package io.github.melomei.ideswitcher.settings
 
 import io.github.melomei.ideswitcher.target.Target
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.ui.TextBrowseFolderListener
+import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBRadioButton
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -25,6 +28,15 @@ class IdeSwitcherConfigurable : Configurable {
         add(windsurfRadio)
         add(traeRadio)
     }
+
+    private val customPathField = TextFieldWithBrowseButton().apply {
+        val descriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor()
+            .withTitle("Select Editor Application Path")
+            .withDescription("Choose the .app bundle or installation directory")
+        addBrowseFolderListener(TextBrowseFolderListener(descriptor))
+    }
+    private val customPathLabel = JLabel("Custom path (optional):")
+
     private var rootPanel: JPanel? = null
 
     override fun getDisplayName(): String = "IDEswitcher"
@@ -48,7 +60,16 @@ class IdeSwitcherConfigurable : Configurable {
         panel.add(windsurfRadio, gbc)
         gbc.gridy = 5
         panel.add(traeRadio, gbc)
+
         gbc.gridy = 6
+        gbc.insets = Insets(16, 4, 4, 4)
+        panel.add(customPathLabel, gbc)
+        gbc.gridy = 7
+        gbc.fill = GridBagConstraints.HORIZONTAL
+        gbc.weightx = 1.0
+        panel.add(customPathField, gbc)
+
+        gbc.gridy = 8
         gbc.weighty = 1.0
         gbc.fill = GridBagConstraints.BOTH
         panel.add(JPanel(), gbc)
@@ -58,22 +79,34 @@ class IdeSwitcherConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        val current = IdeSwitcherSettings.getInstance().state.target
-        return selectedTarget() != current
+        val settings = IdeSwitcherSettings.getInstance()
+        val currentTarget = settings.state.target
+        val currentCustomPath = settings.state.customPaths[currentTarget.name].orEmpty()
+        return selectedTarget() != currentTarget || customPathField.text != currentCustomPath
     }
 
     override fun apply() {
-        IdeSwitcherSettings.getInstance().state.target = selectedTarget()
+        val settings = IdeSwitcherSettings.getInstance()
+        settings.state.target = selectedTarget()
+        val customPath = customPathField.text.trim()
+        val targetName = selectedTarget().name
+        if (customPath.isNotEmpty()) {
+            settings.state.customPaths[targetName] = customPath
+        } else {
+            settings.state.customPaths.remove(targetName)
+        }
     }
 
     override fun reset() {
-        when (IdeSwitcherSettings.getInstance().state.target) {
+        val settings = IdeSwitcherSettings.getInstance()
+        when (settings.state.target) {
             Target.QODER -> qoderRadio.isSelected = true
             Target.CODEFUSE -> codeFuseRadio.isSelected = true
             Target.CURSOR -> cursorRadio.isSelected = true
             Target.WINDSURF -> windsurfRadio.isSelected = true
             Target.TRAE -> traeRadio.isSelected = true
         }
+        customPathField.text = settings.state.customPaths[settings.state.target.name].orEmpty()
     }
 
     override fun disposeUIResources() {

@@ -1,7 +1,7 @@
 # IDEswitcher
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.3.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.4.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS-000000" alt="Platform">
   <img src="https://img.shields.io/badge/language-Kotlin%20%2B%20TypeScript-0095D5" alt="Language">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
@@ -26,14 +26,14 @@ In the era of agentic coding, running IntelliJ IDEA alongside an AI-powered codi
 
 **Option A: Direct Install**
 
-Download `IDEswitcher-1.3.0.zip` from [Releases](../../releases), then in IDEA: Settings → Plugins → ⚙️ → Install Plugin from Disk...
+Download `IDEswitcher-1.4.0.zip` from [Releases](../../releases), then in IDEA: Settings → Plugins → ⚙️ → Install Plugin from Disk...
 
 **Option B: Build from Source**
 
 ```bash
 cd IDEswitcher-main
 ./gradlew build
-# Output: build/distributions/IDEswitcher-1.3.0.zip
+# Output: build/distributions/IDEswitcher-1.4.0.zip
 ```
 
 After installation, select your jump target in Settings → Tools → IDEswitcher.
@@ -50,7 +50,7 @@ Copy the entire `agentic-ide-extension/` directory to the corresponding location
 | Editor    | Install Path                   | Directory Name                       |
 |-----------|--------------------------------|--------------------------------------|
 | Qoder     | `~/.qoder/extensions/`         | `ide-switcher`                       |
-| CodeFuse  | `~/.codefuse/extensions/`      | `melomei.ide-switcher-1.3.0`    |
+| CodeFuse  | `~/.codefuse/extensions/`      | `melomei.ide-switcher-1.4.0`    |
 | Cursor    | Built-in (VS Code extension)   | Install via Extensions panel         |
 | Windsurf  | Built-in (VS Code extension)   | Install via Extensions panel         |
 | Trae      | Built-in (VS Code extension)   | Install via Extensions panel         |
@@ -134,8 +134,30 @@ cd agentic-ide-extension && npm test
 ## Known Limitations
 
 - macOS only (contributions for Linux/Windows support are welcome!)
-- IntelliJ IDEA path detection only covers standard installations under `/Applications`; JetBrains Toolbox custom paths are not auto-detected
-- Editor paths are hardcoded to `/Applications/` defaults
+- Editor app paths default to `/Applications/` — use the custom path setting for non-standard installations
+
+## Troubleshooting
+
+**"Editor not found" balloon notification:**
+
+1. Make sure the target editor is installed
+2. If installed in a non-standard location, set a custom path in Settings → Tools → IDEswitcher
+3. For JetBrains Toolbox users: the plugin now auto-detects Toolbox-managed installations
+
+**Jump fails silently or CLI errors:**
+
+The plugin now captures stderr and shows it in a balloon notification. Common causes:
+
+- CLI binary missing: some editors require you to install their CLI manually (e.g., VS Code → "Install 'code' command in PATH")
+- Permission denied: run `chmod +x <path-to-cli>` on the CLI binary
+
+**Extension side (jumping back to IntelliJ):**
+
+- "IntelliJ IDEA CLI not found": Open IntelliJ → Tools → Create Command-line Launcher
+- "IntelliJ IDEA took too long to respond": IDEA may be busy indexing; wait and try again
+- "Permission denied": Run `chmod +x` on the `idea` binary
+
+---
 
 ## Contributing
 

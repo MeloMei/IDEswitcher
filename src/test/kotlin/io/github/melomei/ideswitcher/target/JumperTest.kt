@@ -3,142 +3,127 @@ package io.github.melomei.ideswitcher.target
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class JumperTest {
 
-    private object FakeJumper : Jumper {
-        override val target = Target.QODER
-        override val displayName = "Fake"
-        override val appPath = "/tmp/Fake.app"
-        override val cliPath = "/tmp/Fake.app/bin/code"
-    }
-
     @Test
     fun `buildCommand with file + line + column uses --goto`() {
-        val cmd = FakeJumper.buildCommand(
-            projectPath = "/proj",
-            filePath = "/proj/src/Foo.kt",
-            line = 42,
-            column = 7
-        )
+        val cli = "/tmp/Fake.app/bin/code"
+        val cmd = QoderJumper.buildCommand(cli, "/proj", "/proj/src/Foo.kt", 42, 7)
         assertContentEquals(
-            arrayOf("/tmp/Fake.app/bin/code", "--goto", "/proj/src/Foo.kt:42:7"),
+            arrayOf(cli, "--goto", "/proj/src/Foo.kt:42:7"),
             cmd
         )
     }
 
     @Test
     fun `buildCommand with file + line but no column defaults column to 1`() {
-        val cmd = FakeJumper.buildCommand(
-            projectPath = "/proj",
-            filePath = "/proj/src/Foo.kt",
-            line = 42,
-            column = null
-        )
+        val cli = "/tmp/Fake.app/bin/code"
+        val cmd = QoderJumper.buildCommand(cli, "/proj", "/proj/src/Foo.kt", 42, null)
         assertContentEquals(
-            arrayOf("/tmp/Fake.app/bin/code", "--goto", "/proj/src/Foo.kt:42:1"),
+            arrayOf(cli, "--goto", "/proj/src/Foo.kt:42:1"),
             cmd
         )
     }
 
     @Test
     fun `buildCommand with file but no line opens file directly`() {
-        val cmd = FakeJumper.buildCommand(
-            projectPath = "/proj",
-            filePath = "/proj/src/Foo.kt",
-            line = null,
-            column = null
-        )
+        val cli = "/tmp/Fake.app/bin/code"
+        val cmd = QoderJumper.buildCommand(cli, "/proj", "/proj/src/Foo.kt", null, null)
         assertContentEquals(
-            arrayOf("/tmp/Fake.app/bin/code", "/proj/src/Foo.kt"),
+            arrayOf(cli, "/proj/src/Foo.kt"),
             cmd
         )
     }
 
     @Test
     fun `buildCommand without file opens project root`() {
-        val cmd = FakeJumper.buildCommand(
-            projectPath = "/proj",
-            filePath = null,
-            line = null,
-            column = null
-        )
+        val cli = "/tmp/Fake.app/bin/code"
+        val cmd = QoderJumper.buildCommand(cli, "/proj", null, null, null)
         assertContentEquals(
-            arrayOf("/tmp/Fake.app/bin/code", "/proj"),
+            arrayOf(cli, "/proj"),
             cmd
         )
     }
 
     @Test
     fun `buildCommand ignores line when filePath is null`() {
-        val cmd = FakeJumper.buildCommand(
-            projectPath = "/proj",
-            filePath = null,
-            line = 99,
-            column = 99
-        )
+        val cli = "/tmp/Fake.app/bin/code"
+        val cmd = QoderJumper.buildCommand(cli, "/proj", null, 99, 99)
         assertContentEquals(
-            arrayOf("/tmp/Fake.app/bin/code", "/proj"),
+            arrayOf(cli, "/proj"),
             cmd
         )
     }
 
-    // --- Jumper path and target verification ---
+    // --- EditorProfile verification ---
 
     @Test
-    fun `QoderJumper has correct paths and target`() {
-        assertEquals(Target.QODER, QoderJumper.target)
-        assertEquals("Qoder", QoderJumper.displayName)
-        assertEquals("/Applications/Qoder.app", QoderJumper.appPath)
-        assertTrue(QoderJumper.cliPath.startsWith(QoderJumper.appPath))
-        assertTrue(QoderJumper.cliPath.endsWith("/code"))
+    fun `all profiles have correct target mapping`() {
+        assertEquals(Target.QODER, EditorProfile.QODER.target)
+        assertEquals(Target.CODEFUSE, EditorProfile.CODEFUSE.target)
+        assertEquals(Target.CURSOR, EditorProfile.CURSOR.target)
+        assertEquals(Target.WINDSURF, EditorProfile.WINDSURF.target)
+        assertEquals(Target.TRAE, EditorProfile.TRAE.target)
     }
 
     @Test
-    fun `CodeFuseJumper has correct paths and target`() {
-        assertEquals(Target.CODEFUSE, CodeFuseJumper.target)
-        assertEquals("CodeFuse", CodeFuseJumper.displayName)
-        assertEquals("/Applications/CodeFuse.app", CodeFuseJumper.appPath)
-        assertTrue(CodeFuseJumper.cliPath.startsWith(CodeFuseJumper.appPath))
-        assertTrue(CodeFuseJumper.cliPath.endsWith("/code"))
+    fun `all profiles have display names`() {
+        assertEquals("Qoder", EditorProfile.QODER.displayName)
+        assertEquals("CodeFuse", EditorProfile.CODEFUSE.displayName)
+        assertEquals("Cursor", EditorProfile.CURSOR.displayName)
+        assertEquals("Windsurf", EditorProfile.WINDSURF.displayName)
+        assertEquals("Trae", EditorProfile.TRAE.displayName)
     }
 
     @Test
-    fun `CursorJumper has correct paths and target`() {
-        assertEquals(Target.CURSOR, CursorJumper.target)
-        assertEquals("Cursor", CursorJumper.displayName)
-        assertEquals("/Applications/Cursor.app", CursorJumper.appPath)
-        assertTrue(CursorJumper.cliPath.startsWith(CursorJumper.appPath))
-        assertTrue(CursorJumper.cliPath.endsWith("/code"))
+    fun `all profiles have app bundle names ending in dot app`() {
+        for (profile in EditorProfile.entries) {
+            assertTrue(
+                profile.appBundleName.endsWith(".app"),
+                "${profile.displayName} appBundleName should end with .app"
+            )
+        }
     }
 
     @Test
-    fun `WindsurfJumper has correct paths and target`() {
-        assertEquals(Target.WINDSURF, WindsurfJumper.target)
-        assertEquals("Windsurf", WindsurfJumper.displayName)
-        assertEquals("/Applications/Windsurf.app", WindsurfJumper.appPath)
-        assertTrue(WindsurfJumper.cliPath.startsWith(WindsurfJumper.appPath))
-        assertTrue(WindsurfJumper.cliPath.endsWith("/code"))
+    fun `all profiles have cli paths ending in code`() {
+        for (profile in EditorProfile.entries) {
+            assertTrue(
+                profile.cliRelativePath.endsWith("/code"),
+                "${profile.displayName} cliRelativePath should end with /code"
+            )
+        }
     }
 
     @Test
-    fun `TraeJumper has correct paths and target`() {
-        assertEquals(Target.TRAE, TraeJumper.target)
-        assertEquals("Trae", TraeJumper.displayName)
-        assertEquals("/Applications/Trae.app", TraeJumper.appPath)
-        assertTrue(TraeJumper.cliPath.startsWith(TraeJumper.appPath))
-        assertTrue(TraeJumper.cliPath.endsWith("/code"))
+    fun `forTarget returns correct profile for each target`() {
+        for (target in Target.entries) {
+            val profile = EditorProfile.forTarget(target)
+            assertEquals(target, profile.target)
+        }
+    }
+
+    @Test
+    fun `all jumpers have matching profile`() {
+        assertEquals(EditorProfile.QODER, QoderJumper.profile)
+        assertEquals(EditorProfile.CODEFUSE, CodeFuseJumper.profile)
+        assertEquals(EditorProfile.CURSOR, CursorJumper.profile)
+        assertEquals(EditorProfile.WINDSURF, WindsurfJumper.profile)
+        assertEquals(EditorProfile.TRAE, TraeJumper.profile)
     }
 
     @Test
     fun `all jumpers produce correct --goto command format`() {
         val jumpers = listOf(QoderJumper, CodeFuseJumper, CursorJumper, WindsurfJumper, TraeJumper)
         for (jumper in jumpers) {
-            val cmd = jumper.buildCommand("/proj", "/proj/Main.kt", 10, 5)
-            assertEquals(jumper.cliPath, cmd[0], "${jumper.displayName} cliPath mismatch")
-            assertEquals("--goto", cmd[1], "${jumper.displayName} --goto flag missing")
-            assertEquals("/proj/Main.kt:10:5", cmd[2], "${jumper.displayName} goto arg wrong")
+            val cli = jumper.profile.cliRelativePath
+            val cmd = jumper.buildCommand(cli, "/proj", "/proj/Main.kt", 10, 5)
+            assertEquals(cli, cmd[0], "${jumper.profile.displayName} cliPath mismatch")
+            assertEquals("--goto", cmd[1], "${jumper.profile.displayName} --goto flag missing")
+            assertEquals("/proj/Main.kt:10:5", cmd[2], "${jumper.profile.displayName} goto arg wrong")
         }
     }
 }

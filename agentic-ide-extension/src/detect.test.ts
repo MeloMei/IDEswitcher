@@ -1,30 +1,54 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import * as fs from "fs";
+import * as child_process from "child_process";
 import { detectIntelliJ, clearCache, IDEA_DIRS } from "./detect";
 
 vi.mock("fs");
+vi.mock("child_process");
 
 describe("detectIntelliJ", () => {
     beforeEach(() => {
         clearCache();
         vi.restoreAllMocks();
+        // Default: `which` finds nothing
+        vi.mocked(child_process.execFileSync).mockImplementation(() => {
+            throw new Error("not found");
+        });
     });
 
     it("returns null when no IntelliJ installation is found", () => {
         vi.mocked(fs.accessSync).mockImplementation(() => {
             throw new Error("ENOENT");
         });
+        vi.mocked(fs.existsSync).mockReturnValue(false);
 
         const result = detectIntelliJ();
         expect(result).toBeNull();
     });
 
-    it("returns the first matching IntelliJ installation", () => {
+    it("prefers $PATH lookup over /Applications scan", () => {
+        const mockExec = vi.mocked(child_process.execFileSync);
+        mockExec.mockReturnValue("/usr/local/bin/idea\n");
+
+        vi.mocked(fs.existsSync).mockReturnValue(true);
+        vi.mocked(fs.accessSync).mockReturnValue(); // all accessible
+
+        const result = detectIntelliJ();
+        expect(result).not.toBeNull();
+        expect(result!.cli).toBe("/usr/local/bin/idea");
+        expect(result!.source).toBe("path");
+    });
+
+    it("falls back to /Applications when $PATH has no idea", () => {
+        // which fails
+        vi.mocked(child_process.execFileSync).mockImplementation(() => {
+            throw new Error("not found");
+        });
+
         const mockAccess = vi.mocked(fs.accessSync);
-        // Only the second path works
-        mockAccess.mockImplementation((path: fs.PathLike, mode?: number) => {
-            if (String(path).includes("IntelliJ IDEA.app/Contents/MacOS/idea")) {
-                return; // success
+        mockAccess.mockImplementation((p: fs.PathLike) => {
+            if (String(p).includes("IntelliJ IDEA.app/Contents/MacOS/idea")) {
+                return;
             }
             throw new Error("ENOENT");
         });
@@ -32,42 +56,47 @@ describe("detectIntelliJ", () => {
         const result = detectIntelliJ();
         expect(result).not.toBeNull();
         expect(result!.app).toBe("/Applications/IntelliJ IDEA.app");
-        expect(result!.cli).toBe("/Applications/IntelliJ IDEA.app/Contents/MacOS/idea");
+        expect(result!.source).toBe("applications");
     });
 
     it("caches the result on subsequent calls", () => {
-        const mockAccess = vi.mocked(fs.accessSync);
-        mockAccess.mockReturnValue(); // all paths accessible
+        vi.mocked(child_process.execFileSync).mockImplementation(() => {
+            throw new Error("not found");
+        });
+        vi.mocked(fs.accessSync).mockReturnValue();
 
         const first = detectIntelliJ(["/Applications/IntelliJ IDEA.app"]);
-        const callCountAfterFirst = mockAccess.mock.calls.length;
+        expect(first!.source).toBe("applications");
 
         const second = detectIntelliJ(["/Applications/IntelliJ IDEA.app"]);
-        // Second call should hit cache (with validation), not re-scan all dirs
-        expect(second).toEqual(first);
+        expect(second!.source).toBe("cache");
+        expect(second!.cli).toBe(first!.cli);
     });
 
     it("invalidates cache when cached path no longer exists", () => {
-        const mockAccess = vi.mocked(fs.accessSync);
-        mockAccess.mockReturnValue();
+        vi.mocked(child_process.execFileSync).mockImplementation(() => {
+            throw new Error("not found");
+        });
+        vi.mocked(fs.accessSync).mockReturnValue();
 
-        // First call caches the result
         detectIntelliJ(["/Applications/IntelliJ IDEA.app"]);
-
-        // Now make the cached path fail
         clearCache();
-        mockAccess.mockImplementation(() => {
+
+        vi.mocked(fs.accessSync).mockImplementation(() => {
             throw new Error("ENOENT");
         });
+        vi.mocked(fs.existsSync).mockReturnValue(false);
 
         const result = detectIntelliJ(["/Applications/IntelliJ IDEA.app"]);
         expect(result).toBeNull();
     });
 
     it("respects custom dirs parameter", () => {
-        const mockAccess = vi.mocked(fs.accessSync);
-        mockAccess.mockImplementation((path: fs.PathLike) => {
-            if (String(path).includes("/custom/path/Contents/MacOS/idea")) {
+        vi.mocked(child_process.execFileSync).mockImplementation(() => {
+            throw new Error("not found");
+        });
+        vi.mocked(fs.accessSync).mockImplementation((p: fs.PathLike) => {
+            if (String(p).includes("/custom/path/Contents/MacOS/idea")) {
                 return;
             }
             throw new Error("ENOENT");
@@ -87,12 +116,9 @@ describe("detectIntelliJ", () => {
 
 describe("line and column conversion", () => {
     it("converts 0-based VS Code position to 1-based IntelliJ position", () => {
-        // VS Code uses 0-based line/character, IntelliJ CLI uses 1-based
         const vsCodeLine = 41;
         const vsCodeChar = 6;
-        const ideaLine = String(vsCodeLine + 1);
-        const ideaCol = String(vsCodeChar + 1);
-        expect(ideaLine).toBe("42");
-        expect(ideaCol).toBe("7");
+        expect(String(vsCodeLine + 1)).toBe("42");
+        expect(String(vsCodeChar + 1)).toBe("7");
     });
 });

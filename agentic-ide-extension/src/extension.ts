@@ -10,7 +10,9 @@ export function activate(context: vscode.ExtensionContext) {
             if (!idea) {
                 vscode.window.showErrorMessage(
                     'IntelliJ IDEA not found.\n\n' +
-                    'Please install IntelliJ IDEA in /Applications/ or run it at least once.'
+                    'Tried: $PATH lookup, /Applications/, JetBrains Toolbox.\n\n' +
+                    'Make sure IntelliJ IDEA is installed and the `idea` CLI is available.\n' +
+                    'In IDEA: Tools → Create Command-line Launcher.'
                 );
                 return;
             }
@@ -35,10 +37,23 @@ export function activate(context: vscode.ExtensionContext) {
 
             execFile(idea.cli, args, { timeout: 10000 }, (error) => {
                 if (error) {
-                    const message =
-                        (error as any).code === 'ENOENT'
-                            ? 'IntelliJ IDEA not found.\n\nPlease make sure IntelliJ IDEA is installed.'
-                            : `Failed to jump to IntelliJ IDEA: ${error.message}`;
+                    let message: string;
+                    const code = (error as any).code;
+                    if (code === 'ENOENT') {
+                        message =
+                            'IntelliJ IDEA CLI not found.\n\n' +
+                            'Open IntelliJ → Tools → Create Command-line Launcher to install the `idea` CLI.';
+                    } else if (code === 'ETIMEDOUT' || (error as any).killed) {
+                        message =
+                            'IntelliJ IDEA took too long to respond (>10s).\n\n' +
+                            'It may be busy indexing. Try again in a moment.';
+                    } else if ((error as any).code === 'EACCES') {
+                        message =
+                            `Permission denied: ${idea.cli}\n\n` +
+                            'Run: chmod +x "' + idea.cli + '"';
+                    } else {
+                        message = `Failed to jump to IntelliJ IDEA: ${error.message}`;
+                    }
                     vscode.window.showErrorMessage(message);
                 }
             });
