@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>io.github.melomei.ideswitcher</id>
     <name>IDEswitcher</name>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
     <vendor url="https://github.com/MeloMei/IDEswitcher">MeloMei</vendor>
 
     <description><![CDATA[
@@ -21,6 +21,13 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>1.7.0</p>
+        <ul>
+            <li>Status bar widget showing current jump target — click to cycle through installed editors</li>
+            <li>Visual feedback after successful jump (status bar info message)</li>
+            <li>Error notifications now include [Open Settings] action button</li>
+            <li>Welcome notification on first install with [Configure Target] action</li>
+        </ul>
         <p>1.6.0</p>
         <ul>
             <li>Linux support: full platform compatibility for IntelliJ IDEA ↔ AI editor jumping</li>
@@ -78,6 +85,11 @@
             id="IDEswitcher"
             displayType="BALLOON"
             isLogByDefault="true"/>
+        <statusBarWidgetFactory
+            id="IDEswitcherTargetWidget"
+            implementation="io.github.melomei.ideswitcher.widget.TargetWidgetFactory"/>
+        <postStartupActivity
+            implementation="io.github.melomei.ideswitcher.startup.WelcomeActivity"/>
     </extensions>
 
     <actions>

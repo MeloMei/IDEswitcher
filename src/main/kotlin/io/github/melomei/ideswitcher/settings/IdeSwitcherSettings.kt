@@ -16,6 +16,8 @@ class IdeSwitcherSettings : PersistentStateComponent<IdeSwitcherSettings.State> 
         var target: Target = pickDefault(),
         /** Per-target custom app path override. Key is Target.name, value is path string. */
         var customPaths: MutableMap<String, String> = mutableMapOf(),
+        /** Whether the welcome notification has been shown. */
+        var firstRunDone: Boolean = false,
     )
 
     private var state = State()

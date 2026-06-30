@@ -1,7 +1,7 @@
 # IDEswitcher
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.6.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.7.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-000000" alt="Platform">
   <img src="https://img.shields.io/badge/language-Kotlin%20%2B%20TypeScript-0095D5" alt="Language">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
@@ -17,6 +17,7 @@ In the era of agentic coding, running IntelliJ IDEA alongside an AI-powered codi
 - **Precise Positioning**: Cursor lands on the exact same line and column after jumping
 - **5 Editor Targets**: Qoder, CodeFuse, Cursor, Windsurf, Trae — configurable in Settings → Tools → IDEswitcher
 - **Smart Defaults**: Auto-detects installed editors on first launch
+- **Status Bar Widget**: Shows current jump target — click to cycle through installed editors
 
 ---
 
@@ -26,14 +27,14 @@ In the era of agentic coding, running IntelliJ IDEA alongside an AI-powered codi
 
 **Option A: Direct Install**
 
-Download `IDEswitcher-1.6.0.zip` from [Releases](../../releases), then in IDEA: Settings → Plugins → ⚙️ → Install Plugin from Disk...
+Download `IDEswitcher-1.7.0.zip` from [Releases](../../releases), then in IDEA: Settings → Plugins → ⚙️ → Install Plugin from Disk...
 
 **Option B: Build from Source**
 
 ```bash
 cd IDEswitcher-main
 ./gradlew build
-# Output: build/distributions/IDEswitcher-1.6.0.zip
+# Output: build/distributions/IDEswitcher-1.7.0.zip
 ```
 
 After installation, select your jump target in Settings → Tools → IDEswitcher.
@@ -50,7 +51,7 @@ Copy the entire `agentic-ide-extension/` directory to the corresponding location
 | Editor    | Install Path                   | Directory Name                       |
 |-----------|--------------------------------|--------------------------------------|
 | Qoder     | `~/.qoder/extensions/`         | `ide-switcher`                       |
-| CodeFuse  | `~/.codefuse/extensions/`      | `melomei.ide-switcher-1.6.0`    |
+| CodeFuse  | `~/.codefuse/extensions/`      | `melomei.ide-switcher-1.7.0`    |
 | Cursor    | Built-in (VS Code extension)   | Install via Extensions panel         |
 | Windsurf  | Built-in (VS Code extension)   | Install via Extensions panel         |
 | Trae      | Built-in (VS Code extension)   | Install via Extensions panel         |

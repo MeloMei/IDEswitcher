@@ -8,6 +8,9 @@ import io.github.melomei.ideswitcher.target.QoderJumper
 import io.github.melomei.ideswitcher.target.Target
 import io.github.melomei.ideswitcher.target.TraeJumper
 import io.github.melomei.ideswitcher.target.WindsurfJumper
+import io.github.melomei.ideswitcher.widget.TargetWidgetFactory
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
@@ -15,6 +18,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.wm.WindowManager
 
 class JumpAction : AnAction() {
 
@@ -58,12 +63,24 @@ class JumpAction : AnAction() {
 
         try {
             jumper.jump(projectPath, filePath, line, column)
+            // Visual feedback in status bar
+            val location = if (filePath != null && line != null) {
+                "${filePath.substringAfterLast('/')}:${line}"
+            } else {
+                projectPath.substringAfterLast('/')
+            }
+            showStatusInfo(project, "Jumped to ${jumper.profile.displayName} at $location")
         } catch (ex: Exception) {
             logger.warn("Failed to jump to ${jumper.profile.displayName}", ex)
             notifyError(project,
                 "Jump to ${jumper.profile.displayName} Failed",
                 ex.message ?: "Unknown error")
         }
+    }
+
+    private fun showStatusInfo(project: com.intellij.openapi.project.Project, message: String) {
+        val statusBar = WindowManager.getInstance().getStatusBar(project)
+        statusBar?.info = message
     }
 
     private fun notifyError(
@@ -74,6 +91,12 @@ class JumpAction : AnAction() {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("IDEswitcher")
             .createNotification(title, content, NotificationType.ERROR)
+            .addAction(object : NotificationAction("Open Settings") {
+                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                    ShowSettingsUtil.getInstance().showSettingsDialog(project, "IDEswitcher")
+                    notification.expire()
+                }
+            })
             .notify(project)
     }
 }

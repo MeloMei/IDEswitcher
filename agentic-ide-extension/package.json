@@ -2,7 +2,7 @@
   "name": "ide-switcher",
   "displayName": "IDEswitcher - Jump to IntelliJ",
   "description": "Jump from this editor to IntelliJ IDEA with current file and cursor position",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "publisher": "melomei",
   "license": "MIT",
   "repository": {
@@ -18,7 +18,7 @@
   "contributes": {
     "commands": [{
       "command": "ideSwitcher.jumpToIntelliJ",
-      "title": "Jump to IntelliJ IDEA"
+      "title": "Jump to IntelliJ IDEA (⇧⌥O)"
     }],
     "keybindings": [{
       "command": "ideSwitcher.jumpToIntelliJ",
@@ -28,7 +28,8 @@
     "menus": {
       "editor/context": [{
         "command": "ideSwitcher.jumpToIntelliJ",
-        "group": "navigation"
+        "group": "navigation",
+        "when": "editorTextFocus"
       }]
     }
   },
